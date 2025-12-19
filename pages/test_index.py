@@ -32,6 +32,26 @@ def page():
 
     test_pages = [
         {
+            "title": "Retro Games Workflow",
+            "description": "Create a retro game video from an image.",
+            "route": "/retro_games",
+        },
+        {
+            "title": "Storyboarder",
+            "description": "Create a video storyboard from a prompt.",
+            "route": "/storyboarder",
+        },
+        {
+            "title": "Character Asset Sheet",
+            "description": "Generate consistent character sheets and scenarios.",
+            "route": "/character_sheet",
+        },
+        {
+            "title": "Brand Adherence",
+            "description": "Generate on-brand images using PDF guidelines.",
+            "route": "/brand_adherence",
+        },
+        {
             "title": "Banana Studio",
             "description": "An experimental Gemini Image Generation page.",
             "route": "/banana-studio",
@@ -45,6 +65,11 @@ def page():
             "title": "Guideline Analysis",
             "description": "A page to analyze a media item's prompt and generate guideline criteria.",
             "route": "/guideline-analysis",
+        },
+        {
+            "title": "Imagen Upscale Test",
+            "description": "Test page for Imagen 4 Upscale.",
+            "route": "/imagen-upscale",
         },
         {
             "title": "VTO Model Composite Card Generator",
@@ -80,6 +105,11 @@ def page():
             "title": "Proxy Caching Test",
             "description": "A page to compare the performance of signed URLs vs. a caching proxy endpoint.",
             "route": "/test_proxy_caching",
+        },
+        {
+            "title": "Async Veo Test",
+            "description": "Test page for the new non-blocking Veo generation flow.",
+            "route": "/test_async_veo",
         },
     ]
 
@@ -153,19 +183,15 @@ def page():
                 border=me.Border(top=me.BorderSide(width=1, color=me.theme_var("tertiary-fixed-variant"))),
                 display="flex",
                 align_items="center",
+                gap=12,
                 background=me.theme_var("inverse-surface"),
                 color=me.theme_var("inverse-on-surface"),
+                cursor="pointer",
             ),
             on_click=on_home_click,
         ):
-            with me.content_button(
-                type="icon",
-                on_click=on_home_click,
-                style=me.Style(margin=me.Margin(left="auto"), color=me.theme_var("inverse-on-surface")),
-                
-            ):
-                with me.tooltip(message="Back to Welcome Page"):
-                    me.icon(icon="auto_awesome")
+            with me.tooltip(message="Back to Welcome Page"):
+                me.icon(icon="auto_awesome", style=me.Style(color=me.theme_var("inverse-on-surface")))
             me.text("Return to GenMedia Creative Studio")
 
 

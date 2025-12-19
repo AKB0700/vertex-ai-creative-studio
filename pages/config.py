@@ -211,6 +211,7 @@ def get_config_table(app_state: AppState):
             "Veo Project ID",
             "Veo Model ID",
             "Veo Experimental Model ID",
+            "Use Media Proxy",
         ],
         "Value": [
             app_state.user_email if app_state.user_email else "Anonymous",
@@ -225,6 +226,7 @@ def get_config_table(app_state: AppState):
             Default.VEO_PROJECT_ID,
             Default.VEO_MODEL_ID,
             Default.VEO_EXP_MODEL_ID,
+            str(Default.USE_MEDIA_PROXY),
         ],
     }
 
@@ -235,6 +237,12 @@ def get_config_table(app_state: AppState):
             config_data["Value"].append(lyria_project_id_val)
         config_data["Config"].append("Lyria Model Version")
         config_data["Value"].append(Default.LYRIA_MODEL_VERSION)
+
+    if hasattr(Default, "GEMINI_WRITERS_WORKSHOP_MODEL_ID"):
+        writers_model = getattr(Default, "GEMINI_WRITERS_WORKSHOP_MODEL_ID")
+        if writers_model != Default.MODEL_ID:
+            config_data["Config"].append("Writers Workshop Model ID")
+            config_data["Value"].append(writers_model)
 
     config_data["Config"].append("Application Verison")
     config_data["Value"].append(f"{Default.VERSION} {Default.APP_ENV}")
