@@ -51,8 +51,8 @@ GenMedia Creative Studio is a web application showcasing Google Cloud's generati
 
 Current featureset
 
-- Image: Imagen 3, Imagen 4, Virtual Try-On, Gemini 2.5 Flash Image Generation
-- Video: Veo 2, Veo 3
+- Image: Gemini 3.1 Flash Image Generation (Nano Banana 2), Gemini 3 Pro Image (Nano Banana Pro), Imagen 3, Imagen 4, Virtual Try-On
+- Video: Veo 3.1, Veo 3, Veo 2
 - Music: Lyria
 - Speech: Chirp 3 HD, Gemini Text to Speech
 - Workflows: Character Consistency, Shop the Look, Starter Pack Moodboard, Interior Designer
@@ -69,6 +69,10 @@ Here's a glimpse of what you'll find:
 **MCP Tools**
 
 - **MCP Tools for Genmedia:** Model Context Protocol servers for Veo, Imagen, Lyria, Chirp, and Gemini to bring creativity to your agents.
+  - ⚡ **Instant Installation:** You can now install all MCP servers directly using our pre-compiled binaries:
+    ```bash
+    curl -sL https://raw.githubusercontent.com/GoogleCloudPlatform/vertex-ai-creative-studio/main/experiments/mcp-genmedia/mcp-genmedia-go/install-online.sh | bash
+    ```
 
 **Combined Workflows**
 
@@ -76,6 +80,7 @@ Here's a glimpse of what you'll find:
 - **Storycraft:** An AI-powered video storyboard generation platform that transforms text descriptions into complete video narratives.
     - **Creative GenMedia Workflow:** An end-to-end workflow to produce high-quality, on-brand creative media.
     - **Run, Veo, Run:** A real-time, multimodal video generation experiment that creates a branching narrative loop using Veo 3.1 for video extension and Gemini 3 for context awareness.
+
 **Prompting Techniques**
 
 - **Promptlandia:** A powerful web app to analyze, refine, and improve your prompts.
