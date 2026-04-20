@@ -70,9 +70,9 @@ This project uses a Go workspace (`go.work`) to manage the multiple modules. The
 
 Before validating, ensure your Google Cloud project ID is set as an environment variable:
 ```bash
-export PROJECT_ID=$(gcloud config get project)
+export GOOGLE_CLOUD_PROJECT=$(gcloud config get project)
 # Or, if you prefer to set it manually:
-# export PROJECT_ID="your-google-cloud-project-id"
+# export GOOGLE_CLOUD_PROJECT="your-google-cloud-project-id"
 ```
 
 With the MCP servers for genmedia installed, you can test that they're available by sending a STDIO "tools/list" command (substitute the MCP server in question as needed):
@@ -103,6 +103,12 @@ Either of these should result in a JSON response with a list of tools, similar t
 }
 ```
 
+## 🛠️ Agent Skills
+
+To get the most out of these servers, we recommend using our expert **Agent Skills**. These skills provide AI agents with the procedural knowledge needed to orchestrate complex workflows like podcast generation or video composition.
+
+See the [Agent Skills](../skills/README.md) directory for installation instructions for Gemini CLI and Antigravity.
+
 ## Using Prompts
 
 In addition to tools, the MCP servers now support prompts, providing a more interactive and user-friendly way to access their core functionality. Prompts guide the user through a task, asking for required information if it's not provided.
@@ -121,7 +127,7 @@ To use a prompt, you call the `prompts/get` method with the prompt's name and an
 
 ```bash
 # Call the prompt with a required argument
-export PROJECT_ID=$(gcloud config get project)
+export GOOGLE_CLOUD_PROJECT=$(gcloud config get project)
 echo '{"jsonrpc":"2.0","method":"prompts/get","id":2,"params":{"name":"generate-image","arguments":{"prompt":"a futuristic cityscape at sunset"}}}' | mcp-imagen-go | jq .
 
 # Call the prompt without a required argument
@@ -204,15 +210,21 @@ This allows you to have default values in your `.env` file and override them for
 
 The following variables can be defined in your `.env` file or as shell environment variables:
 
-*   `PROJECT_ID` (string): **Required**. Your Google Cloud Project ID. The application will terminate if this is not set.
-*   `LOCATION` (string): The Google Cloud location/region for Vertex AI services. Defaults to `us-central1` if not set.
+*   `GOOGLE_CLOUD_PROJECT` (string): **Required**. Your Google Cloud Project ID. The application will terminate if this is not set. Note: `PROJECT_ID` is also supported as a fallback.
+    *   **Per-Server Override**: You can override the global project ID for specific servers using `VEO_PROJECT_ID`, `IMAGEN_PROJECT_ID`, `LYRIA_PROJECT_ID`, `GEMINI_PROJECT_ID`, `CHIRP3_PROJECT_ID`, `AVTOOL_PROJECT_ID`, or `NANOBANANA_PROJECT_ID`.
+*   `GOOGLE_CLOUD_LOCATION` (string): The preferred Google Cloud location/region for Vertex AI services. Defaults to `us-central1` if not set.
+    *   **Fallback**: `LOCATION` is also supported as a fallback for `GOOGLE_CLOUD_LOCATION`.
+    *   **Per-Server Override**: You can override the global location for specific servers using `<PREFIX>_LOCATION` (e.g., `VEO_LOCATION`, `IMAGEN_LOCATION`, `LYRIA_LOCATION`, `GEMINI_LOCATION`, `CHIRP3_LOCATION`, `AVTOOL_LOCATION`, or `NANOBANANA_LOCATION`).
 *   `GENMEDIA_BUCKET` (string): An optional default Google Cloud Storage bucket to use for GCS outputs if a bucket is not specified in a tool request.
+*   `ALLOW_UNSAFE_MODELS` (boolean): Optional (`true`/`false`). Allows users to bypass strict local model constraint validation, enabling them to test experimental or pre-release model strings that are not yet hardcoded in the registry. Defaults to `false`.
+*   `ENABLE_OPTIONAL_HEADER_CAPTURE` (boolean): Optional (`true`/`false`). Intended for internal debugging. When set to `true`, the server intercepts API requests and injects the raw ADC Bearer token to capture and surface the `x-goog-sherlog-link` header in the tool output. This feature is supported for Imagen, Gemini, NanoBanana, and Lyria, but currently not supported for Veo due to Go SDK limitations with long-running operations. Defaults to `false`.
 *   `PORT` (string): Specifies the port for the `http` transport. If not set, it defaults to `8080`. Note that for the `sse` transport, most servers use a hardcoded port (typically `8081`) to avoid conflicts.
+*   `GCS_DOWNLOAD_TIMEOUT` (string): The timeout for GCS download/streaming operations. Accepts Go duration strings (e.g. `"30s"`, `"5m"`, `"2m30s"`). Defaults to `5m` if not set. Increase this value when working with large media files like videos or high-resolution images.
 
 *Example:*
 ```bash
-export PROJECT_ID="your-google-cloud-project-id"
-export LOCATION="us-central1"
+export GOOGLE_CLOUD_PROJECT="your-google-cloud-project-id"
+export GOOGLE_CLOUD_LOCATION="us-central1"
 ```
 
 ### Local Development & OpenTelemetry

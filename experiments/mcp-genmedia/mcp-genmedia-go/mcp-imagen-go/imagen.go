@@ -49,7 +49,7 @@ var (
 
 const (
 	serviceName = "mcp-imagen-go"
-	version     = "3.2.0" // Synchronize release version
+	version     = "3.8.0" // Synchronize release version
 )
 
 func init() {
@@ -81,6 +81,10 @@ func main() {
 	if appConfig.ApiEndpoint != "" {
 		log.Printf("Using custom Vertex AI endpoint: %s", appConfig.ApiEndpoint)
 		clientConfig.HTTPOptions.BaseURL = appConfig.ApiEndpoint
+	}
+
+	if err := common.InjectCaptureHeaders(clientCtx, appConfig, clientConfig); err != nil {
+		log.Printf("Warning: Failed to inject capture headers: %v", err)
 	}
 
 	genAIClient, err = genai.NewClient(clientCtx, clientConfig)
@@ -266,12 +270,12 @@ func imagenGenerationHandler(client *genai.Client, ctx context.Context, request 
 		modelInput = "imagen-4.0-fast-generate-001"
 	}
 
-	canonicalName, found := common.ResolveImagenModel(modelInput)
+	modelInfo, found := common.ResolveImagenModel(modelInput, appConfig.AllowUnsafeModels)
 	if !found {
 		return &mcp.CallToolResult{Content: []mcp.Content{mcp.TextContent{Type: "text", Text: fmt.Sprintf("Error: Model '%s' is not a valid or supported model name.", modelInput)}}}, nil
 	}
-	model := canonicalName
-	modelDetails := common.SupportedImagenModels[model]
+	model := modelInfo.CanonicalName
+	modelDetails := modelInfo
 
 	var numberOfImages int32 = 1
 	if numImagesArg, ok := request.GetArguments()["num_images"]; ok {
@@ -385,6 +389,13 @@ func imagenGenerationHandler(client *genai.Client, ctx context.Context, request 
 	span.SetAttributes(attribute.Float64("duration_ms", float64(apiCallDuration.Milliseconds())))
 
 	var contentItems []mcp.Content
+
+	// Check for optional Sherlog header
+	if response != nil && response.SDKHTTPResponse != nil && response.SDKHTTPResponse.Headers != nil {
+		if link := response.SDKHTTPResponse.Headers.Get("x-goog-sherlog-link"); link != "" {
+			contentItems = append(contentItems, mcp.TextContent{Type: "text", Text: fmt.Sprintf("Optional header capture: %s\n", link)})
+		}
+	}
 
 	if err != nil {
 		errorMessage := fmt.Sprintf("error generating images: %v", err.Error())

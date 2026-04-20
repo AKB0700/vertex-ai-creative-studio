@@ -20,13 +20,13 @@ certifi==2025.11.12
     #   requests
 cffi==2.0.0 ; platform_python_implementation != 'PyPy'
     # via cryptography
-charset-normalizer==3.4.3
+charset-normalizer==3.4.7
     # via requests
-click==8.3.0
+click==8.3.2
     # via
     #   google-adk
     #   uvicorn
-cloudpickle==3.1.1
+cloudpickle==3.1.2
     # via google-cloud-aiplatform
 colorama==0.4.6 ; sys_platform == 'win32'
     # via click
@@ -40,7 +40,7 @@ fastapi==0.118.3
     # via google-adk
 google-adk==1.15.1
     # via adk-genmedia-agent
-google-api-core==2.30.0
+google-api-core==2.30.2
     # via
     #   google-api-python-client
     #   google-cloud-aiplatform
@@ -81,7 +81,7 @@ google-cloud-audit-log==0.4.0
     # via google-cloud-logging
 google-cloud-bigquery==3.38.0
     # via google-cloud-aiplatform
-google-cloud-core==2.4.3
+google-cloud-core==2.5.1
     # via
     #   google-cloud-bigquery
     #   google-cloud-logging
@@ -108,7 +108,7 @@ google-genai==1.29.0
     # via
     #   google-adk
     #   google-cloud-aiplatform
-google-resumable-media==2.7.2
+google-resumable-media==2.8.2
     # via
     #   google-cloud-bigquery
     #   google-cloud-storage
@@ -122,7 +122,7 @@ graphviz==0.21
     # via google-adk
 greenlet==3.2.4 ; (python_full_version < '3.14' and platform_machine == 'AMD64') or (python_full_version < '3.14' and platform_machine == 'WIN32') or (python_full_version < '3.14' and platform_machine == 'aarch64') or (python_full_version < '3.14' and platform_machine == 'amd64') or (python_full_version < '3.14' and platform_machine == 'ppc64le') or (python_full_version < '3.14' and platform_machine == 'win32') or (python_full_version < '3.14' and platform_machine == 'x86_64')
     # via sqlalchemy
-grpc-google-iam-v1==0.14.2
+grpc-google-iam-v1==0.14.4
     # via
     #   google-cloud-logging
     #   google-cloud-resource-manager
@@ -141,7 +141,7 @@ h11==0.16.0
     #   uvicorn
 httpcore==1.0.9
     # via httpx
-httplib2==0.31.0
+httplib2==0.31.2
     # via
     #   google-api-python-client
     #   google-auth-httplib2
@@ -246,7 +246,7 @@ python-multipart==0.0.22
     # via mcp
 pyyaml==6.0.3
     # via google-adk
-requests==2.32.5
+requests==2.33.0
     # via
     #   google-api-core
     #   google-cloud-bigquery

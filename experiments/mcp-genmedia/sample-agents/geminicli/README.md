@@ -14,6 +14,23 @@ To configure these servers for gemini cli, you can either add these to your ~/.g
 
 > **Existing Users:** If you have previously installed the GenMedia extension using the older JSON format, please see the [Migration Guide](MIGRATION.md) for quick instructions on upgrading to the new interactive setup.
 
+## .gemini/settings.json: Global Tool Timeout
+
+If you intend to use long-running tools like **Veo** (which takes minutes to generate video) or complex **Gemini TTS** prompts, you **MUST** increase the global tool execution timeout in your `~/.gemini/settings.json` file. 
+
+The `MCP_REQUEST_MAX_TOTAL_TIMEOUT` environment variable controls the wait time for a specific server, but the Gemini CLI itself has a hard global timeout that will kill the connection if not adjusted.
+
+Add the `toolExecutionTimeout` (in milliseconds) to the `experimental` or `general` block:
+
+```json
+{
+  "experimental": {
+    "enableAgents": true,
+    "toolExecutionTimeout": 240000 
+  }
+}
+```
+
 ## .gemini/settings.json: mcpServers
 
 Add the following to your .gemini/settings.json `mcpServers` - you can do this at your ~/.gemini or per project directory.
@@ -60,6 +77,14 @@ A `sample_settings.json` is provided for your convenience.
       "command": "mcp-avtool-go",
       "env": {
         "PROJECT_ID": "YOUR_GOOGLE_CLOUD_PROJECT_ID",
+        "MCP_SERVER_REQUEST_TIMEOUT": "55000"
+      }
+    },
+    "gemini": {
+      "command": "mcp-gemini-go",
+      "env": {
+        "PROJECT_ID": "YOUR_GOOGLE_CLOUD_PROJECT_ID",
+        "MCP_REQUEST_MAX_TOTAL_TIMEOUT": "120000",
         "MCP_SERVER_REQUEST_TIMEOUT": "55000"
       }
     }
@@ -159,6 +184,13 @@ Then, add to that directory a `gemini-extension.json`
       "env": {
         "MCP_SERVER_REQUEST_TIMEOUT": "55000"
       }
+    },
+    "gemini": {
+      "command": "mcp-gemini-go",
+      "env": {
+        "MCP_REQUEST_MAX_TOTAL_TIMEOUT": "120000",
+        "MCP_SERVER_REQUEST_TIMEOUT": "55000"
+      }
     }
   }
 }
@@ -178,17 +210,39 @@ If you only want a subset of the GenMedia tools, we have provided partial config
 - **Images Only**: `gemini extensions install ./sample_extensions/google-genmedia-images` (Installs `nanobanana` and `imagen`)
 - **Video Only**: `gemini extensions install ./sample_extensions/google-genmedia-video` (Installs `veo` and `avtool`)
 
-### Bundled Producer Skill & Commands
+### 🛠️ Using Expert Agent Skills
 
-The `google-genmedia` extension now comes with a bundled **Agent Skill** and **Custom Slash Commands**. 
+We have uplifted our expert media workflows into a dedicated `skills/` directory. These skills provide Gemini CLI with deep domain expertise for audio engineering, video editing, and visual arts.
 
-Once installed, you can activate the expert media production skill by typing:
-```text
-/skill producer
+#### 1. Remote Installation (Direct from GitHub)
+You can install these skills directly from this repository without cloning it:
+
+```bash
+# Install the high-level Producer skill
+gemini skills install https://github.com/GoogleCloudPlatform/vertex-ai-creative-studio.git --path experiments/mcp-genmedia/skills/genmedia-producer
+
+# Install the Video Editor skill
+gemini skills install https://github.com/GoogleCloudPlatform/vertex-ai-creative-studio.git --path experiments/mcp-genmedia/skills/genmedia-video-editor
 ```
-This primes the Gemini CLI with expert instructions on handling `ffmpeg` concat filters, podcast storyboarding, and Veo timeout recovery.
 
-You also gain access to bundled workflows via custom commands:
+#### 2. Local Linking (Workspace)
+If you have already cloned the repository, you can link the entire skills directory to your current workspace:
+
+```bash
+/skills link ../../skills --scope workspace
+```
+
+#### 3. Available Skills
+Once linked or installed, Gemini CLI can automatically activate these skills when relevant:
+
+- `genmedia-producer`: The orchestrator for complex multi-step media workflows (podcasts, storyboards).
+- `genmedia-video-editor`: Expert in FFmpeg composition, overlays, and GIF generation.
+- `genmedia-audio-engineer`: Specialist in TTS synthesis, music generation, and multi-track mixing.
+- `genmedia-image-artist`: Expert in high-fidelity visual generation and prompt optimization.
+- `genmedia-voice-director`: Expert in casting, directing, and generating expressive text-to-speech using Gemini TTS.
+
+#### 4. Example Interaction
+Once the `genmedia-producer` skill is active, you gain access to expert workflows:
 - `/producer:storyboard "A futuristic city"` -> Automatically generates a structured 5-shot markdown storyboard.
 - `/producer:podcast "The future of AI"` -> Initiates the multi-voice Chirp 3 HD audio assembly workflow.
 
@@ -214,6 +268,8 @@ Error connecting to MCP server 'lyria': failed to start or connect to MCP server
 Error: spawn mcp-lyria-go ENOENT
 Error connecting to MCP server 'avtool': failed to start or connect to MCP server 'avtool' {"command":"mcp-avtool-go","trust":true}; 
 Error: spawn mcp-avtool-go ENOENT
+Error connecting to MCP server 'gemini': failed to start or connect to MCP server 'gemini' {"command":"mcp-gemini-go","trust":true}; 
+Error: spawn mcp-gemini-go ENOENT
 ```
 
 **Cause:** This error indicates that the Genmedia MCP server binaries (installed via Go) are not in your terminal's `PATH`. The Gemini CLI cannot locate the commands like `mcp-veo-go`, `mcp-imagen-go`, etc.
@@ -271,6 +327,7 @@ After updating your `PATH`, verify that the MCP servers are accessible:
 which mcp-veo-go
 which mcp-imagen-go
 which mcp-chirp3-go
+which mcp-gemini-go
 ```
 
 Each command should return a path like `/home/username/go/bin/mcp-veo-go`. If they do, your `PATH` is configured correctly.

@@ -51,13 +51,13 @@ variable "model_id" {
 variable "veo_model_id" {
   description = "Veo model ID to use for video generation"
   type        = string
-  default     = "veo-3.0-generate-001"
+  default     = "veo-3.1-fast-generate-001"
 }
 
 variable "veo_exp_model_id" {
   description = "Experimental Veo model ID to use for video generation"
   type        = string
-  default     = "veo-3.0-generate-preview"
+  default     = "veo-3.1-generate-001"
 }
 
 variable "lyria_model_id" {
@@ -95,4 +95,29 @@ variable "sleep_time" {
   description = "Amount of time to wait post service API enablement to allow for eventual consistency to trickly through GCP."
   type        = number
   default     = 45
+}
+
+variable "gemini_critique_model_id" {
+  description = "Gemini model ID to use for Imagen critiques"
+  type        = string
+  default     = "gemini-3-flash-preview"
+}
+
+variable "gemini_critique_location" {
+  description = "Location for the Gemini critique model"
+  type        = string
+  default     = "global"
+}
+
+
+variable "character_consistency_gemini_location" {
+  description = "Location for the Gemini character consistency model"
+  type        = string
+  default     = "global"
+}
+
+
+variable "gemini_tts_location" {
+  description = "Location for the Gemini TTS model"
+  default     = "global"
 }

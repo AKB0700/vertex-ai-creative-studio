@@ -75,22 +75,73 @@ check_path() {
 }
 
 #
+# Function to setup Agent Skills.
+#
+setup_agent_skills() {
+  SKILLS_DIR="$(cd "$(dirname "$0")/../skills" && pwd)"
+  if [ -d "$SKILLS_DIR" ]; then
+    echo -e "\n${BLUE}Expert Agent Skills found at:${NC} $SKILLS_DIR"
+    
+    # Check if gemini CLI is installed for remote installation tip
+    if command -v gemini &> /dev/null; then
+      echo -e "${YELLOW}Tip: You can also install these skills remotely via Gemini CLI:${NC}"
+      echo -e "  ${BLUE}gemini skills install https://github.com/GoogleCloudPlatform/vertex-ai-creative-studio.git --path experiments/mcp-genmedia/skills${NC}\n"
+    fi
+
+    # Gemini CLI
+    if [ -d "$HOME/.gemini" ]; then
+      read -p "Would you like to link these skills to Gemini CLI locally? (y/N): " link_gemini
+      case "$link_gemini" in
+        [yY]|[yY][eE][sS])
+          mkdir -p "$HOME/.gemini/skills"
+          # Link all skill directories
+          for skill in "$SKILLS_DIR"/*/; do
+            if [ -d "$skill" ] && [ -f "${skill}SKILL.md" ]; then
+              skill_name=$(basename "$skill")
+              ln -sfn "$skill" "$HOME/.gemini/skills/$skill_name"
+              echo -e "${GREEN}Linked $skill_name to Gemini CLI${NC}"
+            fi
+          done
+          ;;
+      esac
+    fi
+
+    # Antigravity
+    if [ -d "$HOME/.gemini/antigravity" ]; then
+      read -p "Would you like to install these skills for Antigravity? (y/N): " install_agy
+      case "$install_agy" in
+        [yY]|[yY][eE][sS])
+          mkdir -p "$HOME/.gemini/antigravity/skills"
+          cp -R "$SKILLS_DIR"/* "$HOME/.gemini/antigravity/skills/"
+          echo -e "${GREEN}Skills installed to Antigravity global directory${NC}"
+          ;;
+      esac
+    fi
+  fi
+}
+
+#
 # Main function.
 #
 # This is the main entry point of the script. It calls the other functions to
 # perform the installation process.
 main() {
 
-  if [[ -z "${PROJECT_ID}" ]]; then
-    echo -e "${YELLOW}PROJECT_ID not set, attempting to retrieve from gcloud config...${NC}"
-    PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
-    if [[ -z "${PROJECT_ID}" ]]; then
-      echo -e "${RED}ERROR: Could not retrieve PROJECT_ID from gcloud. Please set it manually.${NC}"
-      echo "For example: export PROJECT_ID=your-gcp-project-id"
+  # Fallback to PROJECT_ID if GOOGLE_CLOUD_PROJECT is not set
+  if [[ -z "${GOOGLE_CLOUD_PROJECT}" ]] && [[ -n "${PROJECT_ID}" ]]; then
+    export GOOGLE_CLOUD_PROJECT="${PROJECT_ID}"
+  fi
+
+  if [[ -z "${GOOGLE_CLOUD_PROJECT}" ]]; then
+    echo -e "${YELLOW}GOOGLE_CLOUD_PROJECT not set, attempting to retrieve from gcloud config...${NC}"
+    GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project 2>/dev/null)
+    if [[ -z "${GOOGLE_CLOUD_PROJECT}" ]]; then
+      echo -e "${RED}ERROR: Could not retrieve GOOGLE_CLOUD_PROJECT from gcloud. Please set it manually.${NC}"
+      echo "For example: export GOOGLE_CLOUD_PROJECT=your-gcp-project-id"
       exit 1
     else
-      echo -e "${GREEN}Successfully retrieved PROJECT_ID: ${PROJECT_ID}${NC}"
-      export PROJECT_ID
+      echo -e "${GREEN}Successfully retrieved GOOGLE_CLOUD_PROJECT: ${GOOGLE_CLOUD_PROJECT}${NC}"
+      export GOOGLE_CLOUD_PROJECT
     fi
   fi
 
@@ -112,6 +163,7 @@ main() {
         done
         echo -e "${GREEN}All MCP servers have been installed successfully.${NC}"
         echo -e "\n${YELLOW}Reminder: Ensure ${BLUE}\$HOME/go/bin${YELLOW} is in your PATH to run the installed servers.${NC}"
+        setup_agent_skills
         break
         ;;
       "Exit")
@@ -125,6 +177,7 @@ main() {
           if (cd "$server" && go mod tidy && go install); then
             echo -e "${GREEN}$server has been installed successfully.${NC}"
             echo -e "\n${YELLOW}Reminder: Ensure ${BLUE}\$HOME/go/bin${YELLOW} is in your PATH to run the installed server.${NC}"
+            setup_agent_skills
           else
             echo -e "${RED}ERROR: Failed to install $server. Please check the output above for details.${NC}"
             exit 1

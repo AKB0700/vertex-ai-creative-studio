@@ -41,7 +41,7 @@ var (
 
 const (
 	serviceName = "mcp-nanobanana-go"
-	version     = "3.2.0" // Synchronize release version
+	version     = "3.8.0" // Synchronize release version
 )
 
 func init() {
@@ -78,6 +78,10 @@ func main() {
 	if appConfig.ApiEndpoint != "" {
 		log.Printf("Using custom Vertex AI endpoint: %s", appConfig.ApiEndpoint)
 		clientConfig.HTTPOptions.BaseURL = appConfig.ApiEndpoint
+	}
+
+	if err := common.InjectCaptureHeaders(clientCtx, appConfig, clientConfig); err != nil {
+		log.Printf("Warning: Failed to inject capture headers: %v", err)
 	}
 
 	genAIClient, err = genai.NewClient(clientCtx, clientConfig)

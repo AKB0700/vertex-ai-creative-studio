@@ -36,9 +36,9 @@ cffi==2.0.0
     # via
     #   cryptography
     #   soundfile
-charset-normalizer==3.4.4
+charset-normalizer==3.4.7
     # via requests
-click==8.3.1
+click==8.3.2
     # via
     #   black
     #   flask
@@ -69,11 +69,11 @@ fastapi==0.124.4
     # via vertex-ai-genmedia-creative-studio (pyproject.toml)
 firebase-admin==7.1.0
     # via vertex-ai-genmedia-creative-studio (pyproject.toml)
-flask==3.1.2
+flask==3.1.3
     # via mesop
 fonttools==4.61.1
     # via matplotlib
-google-api-core==2.30.0
+google-api-core==2.30.2
     # via
     #   firebase-admin
     #   google-cloud-aiplatform
@@ -106,7 +106,7 @@ google-cloud-audit-log==0.4.0
     # via google-cloud-logging
 google-cloud-bigquery==3.39.0
     # via google-cloud-aiplatform
-google-cloud-core==2.5.0
+google-cloud-core==2.5.1
     # via
     #   google-cloud-bigquery
     #   google-cloud-firestore
@@ -132,7 +132,7 @@ google-genai==1.65.0
     # via
     #   vertex-ai-genmedia-creative-studio (pyproject.toml)
     #   google-cloud-aiplatform
-google-resumable-media==2.8.0
+google-resumable-media==2.8.2
     # via
     #   google-cloud-bigquery
     #   google-cloud-storage
@@ -142,7 +142,7 @@ googleapis-common-protos==1.72.0
     #   google-cloud-audit-log
     #   grpc-google-iam-v1
     #   grpcio-status
-grpc-google-iam-v1==0.14.3
+grpc-google-iam-v1==0.14.4
     # via
     #   google-cloud-logging
     #   google-cloud-resource-manager
@@ -180,7 +180,7 @@ idna==3.11
     #   anyio
     #   httpx
     #   requests
-imageio==2.37.2
+imageio==2.37.3
     # via
     #   moviepy
     #   scikit-image
@@ -225,7 +225,7 @@ matplotlib-inline==0.2.1
     # via ipython
 mediapy==1.2.4
     # via vertex-ai-genmedia-creative-studio (pyproject.toml)
-mesop==1.1.1
+mesop==1.2.5
     # via vertex-ai-genmedia-creative-studio (pyproject.toml)
 moviepy==2.2.1
     # via vertex-ai-genmedia-creative-studio (pyproject.toml)
@@ -335,7 +335,7 @@ ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
-pyasn1==0.6.2
+pyasn1==0.6.3
     # via
     #   pyasn1-modules
     #   rsa
@@ -351,7 +351,7 @@ pydantic==2.12.5
     #   mesop
 pydantic-core==2.44.0
     # via pydantic
-pygments==2.19.2
+pygments==2.20.0
     # via
     #   ipython
     #   ipython-pygments-lexers
@@ -468,7 +468,7 @@ wcwidth==0.2.14
     # via prompt-toolkit
 websockets==15.0.1
     # via google-genai
-werkzeug==3.1.5
+werkzeug==3.1.6
     # via
     #   flask
     #   mesop

@@ -20,7 +20,7 @@ import (
 
 const (
 	geminiTTSAPIEndpoint     = "https://texttospeech.googleapis.com/v1/text:synthesize"
-	defaultGeminiTTSModel    = "gemini-2.5-flash-tts"
+	defaultGeminiTTSModel    = "gemini-3.1-flash-tts-preview"
 	defaultGeminiTTSVoice    = "Callirrhoe"
 	timeFormatForTTSFilename = "20060102-150405"
 )
@@ -261,7 +261,7 @@ func geminiAudioTTSHandler(ctx context.Context, request mcp.CallToolRequest) (*m
 	}
 
 	// --- 2. Call the TTS API ---
-	audioBytes, err := callGeminiTTSAPIWithSDK(ctx, text, prompt, voiceName, modelName, audioEncoding, languageCode)
+	audioBytes, err := callGeminiTTSAPI(ctx, text, prompt, voiceName, modelName, audioEncoding, languageCode)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("error calling Gemini TTS API: %v", err)), nil
 	}
@@ -313,7 +313,11 @@ func geminiAudioTTSHandler(ctx context.Context, request mcp.CallToolRequest) (*m
 
 // --- API Helper Function ---
 
-func callGeminiTTSAPIWithSDK(ctx context.Context, text, prompt, voiceName, modelName, audioEncoding, languageCode string) ([]byte, error) {
+func callGeminiTTSAPI(ctx context.Context, text, stylePrompt, voiceName, modelName, audioEncoding, languageCode string) ([]byte, error) {
+	// Detach from parent context to avoid inherited short timeouts from the server/client
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	defer cancel()
+
 	client, err := texttospeech.NewClient(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create texttospeech client: %w", err)
@@ -334,8 +338,8 @@ func callGeminiTTSAPIWithSDK(ctx context.Context, text, prompt, voiceName, model
 		},
 	}
 
-	if prompt != "" {
-		req.Input.Prompt = &prompt
+	if stylePrompt != "" {
+		req.Input.Prompt = &stylePrompt
 	}
 
 	resp, err := client.SynthesizeSpeech(ctx, req)

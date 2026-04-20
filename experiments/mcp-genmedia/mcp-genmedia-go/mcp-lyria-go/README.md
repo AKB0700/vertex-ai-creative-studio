@@ -28,18 +28,24 @@ The following tool is exposed by this server:
 
 The tool utilizes the following environment variables:
 
-*   `PROJECT_ID` (string): **Required**. Your Google Cloud Project ID. The application will terminate if this is not set.
-*   `LOCATION` (string): The primary Google Cloud location for services.
+*   `GOOGLE_CLOUD_PROJECT` (string): **Required**. Your Google Cloud Project ID. The application will terminate if this is not set. Note: `PROJECT_ID` is also supported as a fallback.
+    *   **Override**: You can override this globally for this specific server by setting `LYRIA_PROJECT_ID`.
+*   `GOOGLE_CLOUD_LOCATION` (string): The preferred Google Cloud location/region for Vertex AI services.
     *   Default: `"us-central1"`
-    *   Also used as the default for `LYRIA_LOCATION (Deprecated for V3)` if `LYRIA_LOCATION (Deprecated for V3)` is not set.
+    *   **Fallback**: `LOCATION` is also supported as a fallback for `GOOGLE_CLOUD_LOCATION`.
+    *   **Override**: You can override this globally for this specific server by setting `LYRIA_LOCATION`. (Note: This is now the preferred way to set the location for this server, replacing the deprecated `LYRIA_LOCATION (Deprecated for V3)` variable).
 *   `LYRIA_LOCATION (Deprecated for V3)` (string): The specific Google Cloud location for the Lyria model endpoint.
-    *   Default: Value of `LOCATION` environment variable (e.g., `"us-central1"`).
+    *   Default: Value of `GOOGLE_CLOUD_LOCATION` or `LOCATION` environment variable (e.g., `"us-central1"`).
 *   `LYRIA_MODEL_PUBLISHER (Deprecated)` (string): The publisher of the Lyria model in Vertex AI.
     *   Default: `"google"`
 *   `DEFAULT_LYRIA_MODEL_ID (Deprecated)` (string): The default Lyria model ID to be used if not specified in the request.
     *   Default: `"lyria-3-clip-preview"` (fallback if the environment variable is not set).
 *   `GENMEDIA_BUCKET` (string): An optional default Google Cloud Storage bucket to use for GCS outputs if `output_gcs_bucket` is not specified in the tool request. The object name will be `lyria_outputs/<generated_filename>.wav` within this bucket.
     *   Default: `""` (empty string, meaning no default GCS output path is formed from this variable unless `output_gcs_bucket` is also absent).
+*   `ALLOW_UNSAFE_MODELS` (boolean): Optional (`true`/`false`). Allows users to bypass strict local model constraint validation, enabling them to test experimental or pre-release model strings that are not yet hardcoded in the registry.
+    *   Default: `false`
+*   `ENABLE_OPTIONAL_HEADER_CAPTURE` (boolean): Optional (`true`/`false`). Intended for internal debugging. When set to `true`, the server intercepts API requests and injects the raw ADC Bearer token to capture and surface the `x-goog-sherlog-link` header in the tool output. This feature is supported for Lyria.
+    *   Default: `false`
 *   `PORT` (string, for HTTP transport): The port for the HTTP server to listen on.
     *   Default: `"8080"`
 

@@ -40,7 +40,7 @@ func veoTextToVideoHandler(client *genai.Client, ctx context.Context, request mc
 		return mcp.NewToolResultError("prompt must be a non-empty string and is required for text-to-video"), nil
 	}
 
-	gcsBucket, outputDir, model, finalAspectRatio, numberOfVideos, durationSecs, generateAudio, personGeneration, err := parseCommonVideoParams(request.GetArguments(), appConfig)
+	gcsBucket, outputDir, model, finalAspectRatio, numberOfVideos, durationSecs, generateAudio, personGeneration, err := parseCommonVideoParams(request.GetArguments(), appConfig, false)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
@@ -83,7 +83,10 @@ func veoTextToVideoHandler(client *genai.Client, ctx context.Context, request mc
 		config.GenerateAudio = &generateAudio
 	}
 
-	return callGenerateVideosAPI(client, ctx, mcpServer, progressToken, outputDir, model, prompt, nil, config, "t2v")
+	source := &genai.GenerateVideosSource{
+		Prompt: prompt,
+	}
+	return callGenerateVideosAPI(client, ctx, mcpServer, progressToken, outputDir, model, source, config, "t2v")
 }
 
 // veoImageToVideoHandler is the handler for the 'veo_i2v' tool.
@@ -122,7 +125,7 @@ func veoImageToVideoHandler(client *genai.Client, ctx context.Context, request m
 		prompt = strings.TrimSpace(promptArg)
 	}
 
-	gcsBucket, outputDir, modelName, finalAspectRatio, numberOfVideos, durationSecs, generateAudio, personGeneration, err := parseCommonVideoParams(request.GetArguments(), appConfig)
+	gcsBucket, outputDir, modelName, finalAspectRatio, numberOfVideos, durationSecs, generateAudio, personGeneration, err := parseCommonVideoParams(request.GetArguments(), appConfig, false)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
@@ -172,5 +175,10 @@ func veoImageToVideoHandler(client *genai.Client, ctx context.Context, request m
 		config.GenerateAudio = &generateAudio
 	}
 
-	return callGenerateVideosAPI(client, ctx, mcpServer, progressToken, outputDir, modelName, prompt, inputImage, config, "i2v")
+	source := &genai.GenerateVideosSource{
+		Prompt: prompt,
+		Image:  inputImage,
+	}
+
+	return callGenerateVideosAPI(client, ctx, mcpServer, progressToken, outputDir, modelName, source, config, "i2v")
 }

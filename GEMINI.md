@@ -15,9 +15,10 @@ When new code, features, or experiments are added, it's crucial to update the re
 ## 8. Mesop Development Practices
 
 ### Refactoring and State Management
+*   **Dynamic UI Binding:** UI components must never hardcode lists of available models for specific modes. Instead, add helper functions to the respective `config/*_models.py` file (e.g., `get_models_by_mode`) and dynamically generate UI dropdowns based on the model configuration's declared capabilities.
 *   **Component Modularity:** Mesop pages can quickly grow to thousands of lines. Proactively refactor UI sections (e.g., `upload_ui`, `controls`, `gallery`) into separate files within a `components/` directory to keep page files tractable.
 *   **Event Handler Factories:** When sharing UI components across multiple pages that maintain their own `PageState` classes, use closure factories (e.g., `def get_on_click_handler(state_class): ...`) to generate reusable event handlers. This avoids duplicating state-mutation logic across pages.
-*   **Safe Python Refactoring:** When executing large refactors via CLI tools, be extremely cautious with string replacements (`sed` or python scripts) on nested Mesop structures (`with me.box():`). Missing or extra spaces will cause fatal `IndentationError`s. Prefer targeted replacements or abstracting the block into a function first.
+*   **Safe Python Refactoring:** When executing large refactors via CLI tools, be extremely cautious with string replacements (`sed` or python scripts) on nested Mesop structures (`with me.box():`). Missing or extra spaces will cause fatal `IndentationError`s. Prefer targeted replacements or abstracting the block into a function first. When using python scripts to modify large configuration lists or Mesop component trees, avoid greedy regex replacements (`re.sub`). Rely on exact string matching or AST manipulation to prevent accidentally corrupting adjacent, structurally identical blocks.
 
 ### Component Styling Gotchas
 *   **Button Types:** The `me.content_button` component strictly enforces the `type` argument as a literal: `'raised'`, `'flat'`, `'stroked'`, or `'icon'`. Using invalid MD3 concepts like `'tonal'` will cause a Pydantic `ValidationError` and crash the UI block.
@@ -68,3 +69,28 @@ Instead, you MUST:
 
 **CI Verification Scripts (mcptools):**
 If a Go application initializes network-dependent clients (like Google Cloud `genai.NewClient` or `texttospeech.NewClient`) on startup, it will hang indefinitely inside headless CI runners that lack ADC (Application Default Credentials). To allow tools like `mcptools` to verify the STDIO handshake in CI, you MUST make global client initialization non-fatal during `main()` and defer the strict credential check until the client is actually invoked inside the tool handler.
+
+## 9. Linting and Code Quality
+
+### Selective Linting
+*   **Targeted Execution:** To avoid massive, unintended changes across the entire project, always run linting and formatting tools (e.g., `ruff`, `black`, `isort`) on **only the files you have modified**.
+*   **Command Pattern:** Prefer `ruff check --fix path/to/file.py` and `ruff format path/to/file.py` over running them on the project root (`.`).
+
+### Python Refactoring Risk: Automated Tooling
+*   **The Problem:** Running `ruff check --fix .` or similar automated formatters globally on a large codebase can sometimes aggressively strip out "unused" imports that are actually load-bearing. For example, in Mesop applications, `import pages.my_page` might not be explicitly called but is required for its `@me.page` decorators to register routes. **This is also highly dangerous for configuration files (like `config/` or `__init__.py`) which often "re-export" variables for other modules to use.**
+*   **The Fix:** 
+    1. **Never run global formatting commands.** If you modify 3 files, run `ruff format` and `ruff check --fix` *only* on those 3 files.
+    2. Before committing, always run `git diff` and manually verify that no unexpected imports were deleted or critical structure was modified.
+    3. If a linter warns about an unused import that you know is required for registration, append `# noqa: F401` to the import line instead of deleting it.
+
+
+### Mesop Import Protection
+*   **Critical Imports:** In Mesop applications, imports in `main.py` (and other entry points) are often required for route registration via decorators (e.g., `@me.page`). Linters may incorrectly flag these as unused.
+*   **Preservation:** ALWAYS preserve these imports by adding a `# noqa: F401` comment to the end of the import line. NEVER allow a linter to remove them, as this will break the application's routing.
+
+### Transitive Dependency Awareness
+*   **OpenSSL Errors:** If you encounter `ModuleNotFoundError: No module named 'OpenSSL'`, this usually indicates that `pyOpenSSL` is missing. 
+*   **Resolution:** While not always directly imported, `pyOpenSSL` is a common transitive dependency for secure transport in Google SDKs and `google-auth`. Add `pyOpenSSL` to `pyproject.toml` and run `uv sync` to resolve the issue.
+
+### 10. Dependency and Version Management
+*   **Version Bumping:** When updating the application version number in `pyproject.toml`, you **MUST** also update the hardcoded `VERSION` fallback string in `config/default.py` (e.g., `VERSION: str = "1.7.4"`). This fallback is critical for local development environments where the package is not installed as an editable module via `uv`, which causes `importlib.metadata` to fail.

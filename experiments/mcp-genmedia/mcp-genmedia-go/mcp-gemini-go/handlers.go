@@ -52,8 +52,8 @@ func geminiGenerateContentHandler(client *genai.Client, ctx context.Context, req
 	modelArg, _ := request.GetArguments()["model"].(string)
 	model := "gemini-2.5-flash-image"
 	if modelArg != "" {
-		if resolved, found := common.ResolveGeminiImageModel(modelArg); found {
-			model = resolved
+		if resolvedInfo, found := common.ResolveGeminiImageModel(modelArg, appConfig.AllowUnsafeModels); found {
+			model = resolvedInfo.CanonicalName
 		} else {
 			model = modelArg
 		}
@@ -116,6 +116,13 @@ func geminiGenerateContentHandler(client *genai.Client, ctx context.Context, req
 	// --- Process Response ---
 	var responseText strings.Builder
 	var savedFiles []string
+
+	// Check for optional Sherlog header
+	if resp.SDKHTTPResponse != nil && resp.SDKHTTPResponse.Headers != nil {
+		if link := resp.SDKHTTPResponse.Headers.Get("x-goog-sherlog-link"); link != "" {
+			responseText.WriteString(fmt.Sprintf("Optional header capture: %s\n\n", link))
+		}
+	}
 	gentime := time.Now().Format("20060102150405")
 
 	for _, candidate := range resp.Candidates {
